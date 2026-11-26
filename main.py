@@ -62,6 +62,12 @@ def _check(written: str) -> int:
         return _fail("entry is not a single line")
     if not entry.strip():
         return _fail("entry is only whitespace")
+    # Revision pass (coordinator 26 Nov): reject control characters —
+    # a stray control byte would corrupt the judged text while the line
+    # still looks fine on screen. Tab is allowed; all other sub-32
+    # characters and DEL are not.
+    if any((ord(ch) < 32 and ch != "\t") or ord(ch) == 127 for ch in entry):
+        return _fail("entry contains a control character")
     # Revision pass: reject leading/trailing whitespace — a stray space
     # would silently change the judged text without changing the joke.
     if entry != entry.strip():
